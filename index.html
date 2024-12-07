@@ -50,6 +50,47 @@
             >
                 <option value="">Loading models...</option>
             </select>
+            
+            <details class="mb-4">
+                <summary class="cursor-pointer p-2 bg-gray-50 rounded">Customize README Options</summary>
+                <div class="p-4 border rounded mt-2">
+                    <div class="mb-4">
+                        <label class="block mb-2 font-medium">Template Style:</label>
+                        <select id="templateStyle" class="w-full p-2 border rounded">
+                            <option value="standard">Standard</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="detailed">Detailed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block mb-2 font-medium">Sections to Include:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="sections" value="installation" checked class="mr-2">
+                                Installation
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="sections" value="usage" checked class="mr-2">
+                                Usage
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="sections" value="api" class="mr-2">
+                                API Reference
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="sections" value="contributing" class="mr-2">
+                                Contributing
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="sections" value="license" checked class="mr-2">
+                                License
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
             <button 
                 type="submit"
                 id="submitBtn"
@@ -220,6 +261,10 @@
             
             try {
                 const files = await fetchRepoFiles(repoUrl);
+                const templateStyle = document.getElementById('templateStyle').value;
+                const selectedSections = Array.from(document.querySelectorAll('input[name="sections"]:checked'))
+                    .map(cb => cb.value);
+
                 const fileContext = files
                     .map(f => `File: ${f.path}\n${f.content.length > 1000 ? 
                          f.content.slice(0, 1000) + '\n... (truncated)' : 
@@ -237,7 +282,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: "Generate a concise README focusing on the main purpose, key features, and setup instructions."
+                                content: `Generate a ${templateStyle} README focusing on the main purpose, key features, and setup instructions. Include these sections: ${selectedSections.join(', ')}.`
                             },
                             {
                                 role: "user",
