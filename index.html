@@ -23,6 +23,12 @@
             >
                 Save API Key
             </button>
+            <button 
+                id="clearApiKey"
+                class="mt-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+                Clear API Key
+            </button>
         </div>
     </div>
 
@@ -57,7 +63,15 @@
             <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
         </div>
 
-        <pre id="output" class="hidden bg-white p-4 rounded shadow whitespace-pre-wrap"></pre>
+        <div class="relative">
+            <pre id="output" class="hidden bg-white p-4 rounded shadow whitespace-pre-wrap"></pre>
+            <button 
+                id="copyBtn"
+                class="hidden absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm"
+            >
+                Copy
+            </button>
+        </div>
     </div>
 
     <script>
@@ -155,6 +169,7 @@
                 const data = await response.json();
                 output.textContent = data.choices?.[0]?.message?.content || 'No content generated';
                 output.classList.remove('hidden');
+                copyBtn.classList.remove('hidden');
             } catch (error) {
                 console.error('Error:', error);
                 output.textContent = `Error: ${error.message}`;
@@ -168,6 +183,28 @@
         if (GROQ_API_KEY) {
             fetchModels();
         }
+
+        const copyBtn = document.getElementById('copyBtn');
+        const clearApiKeyBtn = document.getElementById('clearApiKey');
+
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(output.textContent);
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+
+        clearApiKeyBtn.addEventListener('click', () => {
+            localStorage.removeItem('GROQ_API_KEY');
+            GROQ_API_KEY = null;
+            apiKeyModal.classList.remove('hidden');
+            modelSelect.innerHTML = '<option value="">Please enter API key</option>';
+        });
     </script>
 </body>
 </html>
