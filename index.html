@@ -5,27 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>README Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            100: '#1a1b1e',
+                            200: '#2c2e33',
+                            300: '#3d4147'
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
+<body class="bg-gray-50 dark:bg-dark-100 min-h-screen p-8 transition-colors duration-200">
+    <button 
+        id="darkModeToggle"
+        class="fixed top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-dark-200 hover:bg-gray-300 dark:hover:bg-dark-300 transition-colors duration-200"
+        aria-label="Toggle dark mode"
+    >
+        <svg class="w-6 h-6 dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+        <svg class="w-6 h-6 hidden dark:block text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+        </svg>
+    </button>
+
     <div id="apiKeyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 class="text-xl font-bold mb-4">Enter Groq API Key</h2>
+        <div class="bg-white dark:bg-dark-200 p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-xl font-bold mb-4 dark:text-gray-100">Enter Groq API Key</h2>
             <input 
                 type="password" 
                 id="apiKeyInput"
                 placeholder="Enter your API key"
-                class="w-full p-2 border rounded mb-4"
+                class="w-full p-2 border rounded mb-4 bg-white dark:bg-dark-300 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 required
             />
             <button 
                 id="saveApiKey"
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200"
             >
                 Save API Key
             </button>
             <button 
                 id="clearApiKey"
-                class="mt-2 text-sm text-gray-500 hover:text-gray-700"
+                class="mt-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
                 Clear API Key
             </button>
@@ -33,30 +66,32 @@
     </div>
 
     <div class="max-w-2xl mx-auto">
-        <h1 class="text-4xl font-bold mb-8 text-center">README Generator</h1>
+        <h1 class="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">README Generator</h1>
         
         <form id="repoForm" class="mb-8">
             <input 
                 type="url" 
                 id="repoUrl"
                 placeholder="Enter GitHub repo URL"
-                class="w-full p-2 border rounded mb-4"
+                class="w-full p-2 border rounded mb-4 dark:bg-dark-300 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 required
             />
             <select 
                 id="modelSelect"
-                class="w-full p-2 border rounded mb-4"
+                class="w-full p-2 border rounded mb-4 dark:bg-dark-300 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 required
             >
                 <option value="">Loading models...</option>
             </select>
             
             <details class="mb-4">
-                <summary class="cursor-pointer p-2 bg-gray-50 rounded">Customize README Options</summary>
-                <div class="p-4 border rounded mt-2">
+                <summary class="cursor-pointer p-2 bg-gray-50 dark:bg-dark-200 rounded dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors">
+                    Customize README Options
+                </summary>
+                <div class="p-4 border rounded mt-2 dark:border-gray-600 dark:bg-dark-200">
                     <div class="mb-4">
-                        <label class="block mb-2 font-medium">Template Style:</label>
-                        <select id="templateStyle" class="w-full p-2 border rounded">
+                        <label class="block mb-2 font-medium dark:text-gray-200">Template Style:</label>
+                        <select id="templateStyle" class="w-full p-2 border rounded bg-white dark:bg-dark-300 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
                             <option value="standard">Standard</option>
                             <option value="minimal">Minimal</option>
                             <option value="detailed">Detailed</option>
@@ -64,26 +99,26 @@
                     </div>
                     
                     <div class="space-y-2">
-                        <label class="block mb-2 font-medium">Sections to Include:</label>
+                        <label class="block mb-2 font-medium dark:text-gray-200">Sections to Include:</label>
                         <div class="flex flex-wrap gap-4">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="sections" value="installation" checked class="mr-2">
+                            <label class="flex items-center dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                                <input type="checkbox" name="sections" value="installation" checked class="mr-2 text-blue-500 dark:bg-dark-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-offset-dark-200">
                                 Installation
                             </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="sections" value="usage" checked class="mr-2">
+                            <label class="flex items-center dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                                <input type="checkbox" name="sections" value="usage" checked class="mr-2 text-blue-500 dark:bg-dark-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-offset-dark-200">
                                 Usage
                             </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="sections" value="api" class="mr-2">
+                            <label class="flex items-center dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                                <input type="checkbox" name="sections" value="api" class="mr-2 text-blue-500 dark:bg-dark-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-offset-dark-200">
                                 API Reference
                             </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="sections" value="contributing" class="mr-2">
+                            <label class="flex items-center dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                                <input type="checkbox" name="sections" value="contributing" class="mr-2 text-blue-500 dark:bg-dark-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-offset-dark-200">
                                 Contributing
                             </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="sections" value="license" checked class="mr-2">
+                            <label class="flex items-center dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                                <input type="checkbox" name="sections" value="license" checked class="mr-2 text-blue-500 dark:bg-dark-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-offset-dark-200">
                                 License
                             </label>
                         </div>
@@ -107,10 +142,10 @@
         </div>
 
         <div class="relative">
-            <pre id="output" class="hidden bg-white p-4 rounded shadow whitespace-pre-wrap"></pre>
+            <pre id="output" class="hidden bg-white dark:bg-dark-200 p-4 rounded shadow whitespace-pre-wrap dark:text-gray-100"></pre>
             <button 
                 id="copyBtn"
-                class="hidden absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm"
+                class="hidden absolute top-2 right-2 bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-200 px-3 py-1 rounded text-sm dark:text-gray-100 transition-colors duration-200"
             >
                 Copy
             </button>
@@ -335,6 +370,16 @@
             apiKeyModal.classList.remove('hidden');
             modelSelect.innerHTML = '<option value="">Please enter API key</option>';
         });
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+        }
+        
+        darkModeToggle.addEventListener('click', toggleDarkMode);
     </script>
 </body>
 </html>
