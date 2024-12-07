@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>README Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8 text-center">README Generator</h1>
+        
+        <form id="repoForm" class="mb-8">
+            <input 
+                type="url" 
+                id="repoUrl"
+                placeholder="Enter GitHub repo URL"
+                class="w-full p-2 border rounded mb-4"
+                required
+            />
+            <button 
+                type="submit"
+                id="submitBtn"
+                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            >
+                Generate README
+            </button>
+        </form>
+
+        <div id="loading" class="hidden text-center mb-4">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        </div>
+
+        <pre id="output" class="hidden bg-white p-4 rounded shadow whitespace-pre-wrap"></pre>
+    </div>
+
+    <script>
+        const form = document.getElementById('repoForm');
+        const output = document.getElementById('output');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const repoUrl = document.getElementById('repoUrl').value;
+            
+            if (!repoUrl.match(/^https?:\/\/github\.com\/[\w-]+\/[\w-]+/)) {
+                output.textContent = 'Please enter a valid GitHub repository URL';
+                output.classList.remove('hidden');
+                return;
+            }
+
+            if (!GROQ_API_KEY) {
+                output.textContent = 'API key not configured. Please set the GROQ_API_KEY environment variable.';
+                output.classList.remove('hidden');
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            submitBtn.disabled = true;
+            output.classList.add('hidden');
+            
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "mixtral-8x7b-32768",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a helpful assistant that generates README files based on GitHub repositories."
+                            },
+                            {
+                                role: "user",
+                                content: `Generate a professional README for this repo: ${repoUrl}`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                output.textContent = data.choices?.[0]?.message?.content || 'No content generated';
+                output.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                output.textContent = `Error: ${error.message}`;
+                output.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
