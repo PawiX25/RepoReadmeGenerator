@@ -172,9 +172,16 @@
                     >
                         ← Previous
                     </button>
-                    <span class="px-4 py-2 text-sm font-medium bg-white dark:bg-dark-300 border-t border-b border-gray-200 dark:border-gray-600 dark:text-gray-100">
-                        Version <span id="versionCounter">1/1</span>
-                    </span>
+                    <div class="relative">
+                        <button
+                            id="versionDropdown"
+                            class="hidden px-4 py-2 text-sm font-medium bg-white dark:bg-dark-300 border-t border-b border-gray-200 dark:border-gray-600 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-dark-200"
+                        >
+                            Version <span id="versionCounter">1/1</span> ▼
+                        </button>
+                        <div id="versionList" class="hidden absolute z-10 mt-1 w-48 bg-white dark:bg-dark-300 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                        </div>
+                    </div>
                     <button 
                         id="nextVersion"
                         disabled
@@ -551,8 +558,8 @@
                 const newContent = data.choices[0].message.content;
                 
                 readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
-                readmeVersions.push(newContent);
-                displayVersion(readmeVersions.length - 1);
+                versionMetadata = versionMetadata.slice(0, currentVersionIndex + 1);
+                addVersion(newContent, changes);
                 
             } catch (error) {
                 showError('Error: Failed to generate changes');
@@ -598,6 +605,7 @@
         });
 
         let readmeVersions = [];
+        let versionMetadata = [];
         let currentVersionIndex = -1;
 
         function updateVersionControls() {
@@ -606,12 +614,26 @@
             const discardBtn = document.getElementById('discardChanges');
             const acceptBtn = document.getElementById('acceptChanges');
             const versionCounter = document.getElementById('versionCounter');
+            const versionList = document.getElementById('versionList');
+            const versionDropdown = document.getElementById('versionDropdown');
 
             prevBtn.disabled = currentVersionIndex <= 0;
             nextBtn.disabled = currentVersionIndex >= readmeVersions.length - 1;
             
             versionCounter.textContent = `${currentVersionIndex + 1}/${readmeVersions.length}`;
             
+            if (readmeVersions.length > 1) {
+                versionDropdown.classList.remove('hidden');
+                versionList.innerHTML = versionMetadata.map((meta, index) => `
+                    <button class="w-full text-left px-4 py-2 text-sm ${index === currentVersionIndex ? 'bg-blue-50 dark:bg-dark-200' : 'hover:bg-gray-100 dark:hover:bg-dark-200'}" data-version="${index}">
+                        Version ${index + 1}${meta.timestamp ? `<br><span class="text-xs text-gray-500">${new Date(meta.timestamp).toLocaleString()}</span>` : ''}
+                        ${meta.description ? `<br><span class="text-xs text-gray-600 dark:text-gray-400">${meta.description}</span>` : ''}
+                    </button>
+                `).join('');
+            } else {
+                versionDropdown.classList.add('hidden');
+            }
+
             if (currentVersionIndex < readmeVersions.length - 1) {
                 discardBtn.classList.remove('hidden');
                 acceptBtn.classList.remove('hidden');
@@ -626,6 +648,35 @@
                 askChangesBtn.classList.remove('hidden');
             }
         }
+
+        function addVersion(content, description = '') {
+            readmeVersions.push(content);
+            versionMetadata.push({
+                timestamp: Date.now(),
+                description: description
+            });
+            displayVersion(readmeVersions.length - 1);
+        }
+
+        document.getElementById('versionDropdown').addEventListener('click', (e) => {
+            const versionList = document.getElementById('versionList');
+            versionList.classList.toggle('hidden');
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            document.getElementById('versionList').classList.add('hidden');
+        });
+
+        document.getElementById('versionList').addEventListener('click', (e) => {
+            const versionBtn = e.target.closest('button');
+            if (versionBtn) {
+                const version = parseInt(versionBtn.dataset.version);
+                if (!isNaN(version)) {
+                    displayVersion(version);
+                }
+            }
+        });
 
         function displayVersion(index) {
             if (index >= 0 && index < readmeVersions.length) {
@@ -657,6 +708,7 @@
         document.getElementById('discardChanges').addEventListener('click', () => {
             if (confirm('Are you sure you want to discard all newer versions?')) {
                 readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
+                versionMetadata = versionMetadata.slice(0, currentVersionIndex + 1);
                 updateVersionControls();
             }
         });
@@ -664,6 +716,7 @@
         document.getElementById('acceptChanges').addEventListener('click', () => {
             if (confirm('Are you sure you want to accept this version and discard newer ones?')) {
                 readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
+                versionMetadata = versionMetadata.slice(0, currentVersionIndex + 1);
                 updateVersionControls();
             }
         });
