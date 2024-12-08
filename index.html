@@ -172,6 +172,9 @@
                     >
                         ← Previous
                     </button>
+                    <span class="px-4 py-2 text-sm font-medium bg-white dark:bg-dark-300 border-t border-b border-gray-200 dark:border-gray-600 dark:text-gray-100">
+                        Version <span id="versionCounter">1/1</span>
+                    </span>
                     <button 
                         id="nextVersion"
                         disabled
@@ -602,24 +605,41 @@
             const nextBtn = document.getElementById('nextVersion');
             const discardBtn = document.getElementById('discardChanges');
             const acceptBtn = document.getElementById('acceptChanges');
+            const versionCounter = document.getElementById('versionCounter');
 
             prevBtn.disabled = currentVersionIndex <= 0;
             nextBtn.disabled = currentVersionIndex >= readmeVersions.length - 1;
             
+            versionCounter.textContent = `${currentVersionIndex + 1}/${readmeVersions.length}`;
+            
             if (currentVersionIndex < readmeVersions.length - 1) {
                 discardBtn.classList.remove('hidden');
                 acceptBtn.classList.remove('hidden');
+                copyBtn.classList.add('hidden');
+                downloadBtn.classList.add('hidden');
+                askChangesBtn.classList.add('hidden');
             } else {
                 discardBtn.classList.add('hidden');
                 acceptBtn.classList.add('hidden');
+                copyBtn.classList.remove('hidden');
+                downloadBtn.classList.remove('hidden');
+                askChangesBtn.classList.remove('hidden');
             }
         }
 
         function displayVersion(index) {
-            output.textContent = readmeVersions[index];
-            preview.innerHTML = marked.parse(readmeVersions[index]);
-            currentVersionIndex = index;
-            updateVersionControls();
+            if (index >= 0 && index < readmeVersions.length) {
+                output.textContent = readmeVersions[index];
+                preview.innerHTML = marked.parse(readmeVersions[index]);
+                currentVersionIndex = index;
+                updateVersionControls();
+                
+                if (preview.classList.contains('hidden')) {
+                    output.classList.remove('hidden');
+                } else {
+                    preview.innerHTML = marked.parse(readmeVersions[index]);
+                }
+            }
         }
 
         document.getElementById('prevVersion').addEventListener('click', () => {
@@ -635,13 +655,17 @@
         });
 
         document.getElementById('discardChanges').addEventListener('click', () => {
-            readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
-            updateVersionControls();
+            if (confirm('Are you sure you want to discard all newer versions?')) {
+                readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
+                updateVersionControls();
+            }
         });
 
         document.getElementById('acceptChanges').addEventListener('click', () => {
-            readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
-            updateVersionControls();
+            if (confirm('Are you sure you want to accept this version and discard newer ones?')) {
+                readmeVersions = readmeVersions.slice(0, currentVersionIndex + 1);
+                updateVersionControls();
+            }
         });
     </script>
 </body>
