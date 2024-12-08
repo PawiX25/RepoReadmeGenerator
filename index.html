@@ -531,11 +531,11 @@
                         messages: [
                             {
                                 role: "system",
-                                content: "You are a helpful assistant that modifies README files based on user requests. Provide the complete modified README."
+                                content: "You are a README modifier. Output ONLY the modified README content in markdown format. Do not include any explanations, notes, or other text outside the README content itself."
                             },
                             {
                                 role: "user",
-                                content: `Current README:\n${output.textContent}\n\nRequested changes: ${changes}`
+                                content: `Current README:\n${output.textContent}\n\nRequested changes: ${changes}\n\nProvide only the complete modified README content in markdown format.`
                             }
                         ],
                         temperature: 0.7
