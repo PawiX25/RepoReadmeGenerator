@@ -25,6 +25,27 @@
             document.documentElement.classList.add('dark');
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .markdown-preview {
+            padding: 2rem;
+        }
+        .markdown-preview h1 { font-size: 2em; margin-bottom: 0.5em; padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; }
+        .markdown-preview h2 { font-size: 1.5em; margin-bottom: 0.5em; padding-bottom: 0.3em; border-bottom: 1px solid #eaecef; }
+        .markdown-preview h3 { font-size: 1.25em; margin-bottom: 0.5em; }
+        .markdown-preview p { margin-bottom: 1em; line-height: 1.5; }
+        .markdown-preview code { background-color: rgba(27,31,35,.05); border-radius: 3px; padding: 0.2em 0.4em; }
+        .markdown-preview pre code { display: block; padding: 1em; overflow-x: auto; line-height: 1.45; }
+        .markdown-preview blockquote { padding: 0 1em; color: #6a737d; border-left: 0.25em solid #dfe2e5; }
+        .markdown-preview ul, .markdown-preview ol { padding-left: 2em; margin-bottom: 1em; }
+        .dark .markdown-preview code { background-color: rgba(200,200,200,.1); }
+        .dark .markdown-preview blockquote { border-left-color: #4a4a4a; }
+        .markdown-preview ul { list-style: disc outside none; }
+        .markdown-preview ol { list-style: decimal outside none; }
+        .markdown-preview ul ul { list-style: circle outside none; }
+        .markdown-preview ul ul ul { list-style: square outside none; }
+        .markdown-preview li { margin-left: 1em; }
+    </style>
 </head>
 <body class="bg-gray-50 dark:bg-dark-100 min-h-screen p-8 transition-colors duration-200">
     <button 
@@ -142,8 +163,21 @@
         </div>
 
         <div class="relative">
-            <pre id="output" class="hidden bg-white dark:bg-dark-200 p-4 rounded shadow whitespace-pre-wrap dark:text-gray-100"></pre>
-            <div class="absolute top-2 right-2 flex gap-2">
+            <div class="flex justify-end gap-2 mb-2">
+                <div class="inline-flex rounded-md shadow-sm hidden" id="viewToggle">
+                    <button 
+                        id="rawBtn"
+                        class="px-4 py-2 text-sm font-medium bg-white dark:bg-dark-300 border border-gray-200 dark:border-gray-600 rounded-l-lg hover:bg-gray-100 dark:hover:bg-dark-200 active:bg-gray-200 dark:active:bg-dark-100 dark:text-gray-100"
+                    >
+                        Raw
+                    </button>
+                    <button 
+                        id="previewBtn"
+                        class="px-4 py-2 text-sm font-medium bg-white dark:bg-dark-300 border border-gray-200 dark:border-gray-600 rounded-r-lg hover:bg-gray-100 dark:hover:bg-dark-200 active:bg-gray-200 dark:active:bg-dark-100 dark:text-gray-100"
+                    >
+                        Preview
+                    </button>
+                </div>
                 <button 
                     id="copyBtn"
                     class="hidden bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-200 px-3 py-1 rounded text-sm dark:text-gray-100 transition-colors duration-200"
@@ -157,6 +191,8 @@
                     Ask for Changes
                 </button>
             </div>
+            <pre id="output" class="hidden bg-white dark:bg-dark-200 p-4 rounded shadow whitespace-pre-wrap dark:text-gray-100"></pre>
+            <div id="preview" class="hidden bg-white dark:bg-dark-200 rounded shadow dark:text-gray-100 markdown-preview"></div>
         </div>
 
         <div id="changesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -369,6 +405,12 @@
                 const data = await response.json();
                 output.textContent = data.choices?.[0]?.message?.content || 'No content generated';
                 output.classList.remove('hidden');
+                preview.innerHTML = marked.parse(output.textContent);
+                preview.classList.remove('hidden');
+                output.classList.add('hidden');
+                document.getElementById('viewToggle').classList.remove('hidden');
+                previewBtn.classList.add('bg-gray-100', 'dark:bg-dark-200');
+                rawBtn.classList.remove('bg-gray-100', 'dark:bg-dark-200');
                 copyBtn.classList.remove('hidden');
                 askChangesBtn.classList.remove('hidden');
             } catch (error) {
@@ -465,6 +507,7 @@
                 
                 const data = await response.json();
                 output.textContent = data.choices[0].message.content;
+                preview.innerHTML = marked.parse(output.textContent);
             } catch (error) {
                 showError('Error: Failed to generate changes');
                 console.error('Changes error:', error);
@@ -472,6 +515,25 @@
                 loading.classList.add('hidden');
                 changesInput.value = '';
             }
+        });
+
+        const rawBtn = document.getElementById('rawBtn');
+        const previewBtn = document.getElementById('previewBtn');
+        const preview = document.getElementById('preview');
+        
+        rawBtn.addEventListener('click', () => {
+            output.classList.remove('hidden');
+            preview.classList.add('hidden');
+            rawBtn.classList.add('bg-gray-100', 'dark:bg-dark-200');
+            previewBtn.classList.remove('bg-gray-100', 'dark:bg-dark-200');
+        });
+        
+        previewBtn.addEventListener('click', () => {
+            output.classList.add('hidden');
+            preview.classList.remove('hidden');
+            preview.innerHTML = marked.parse(output.textContent);
+            previewBtn.classList.add('bg-gray-100', 'dark:bg-dark-200');
+            rawBtn.classList.remove('bg-gray-100', 'dark:bg-dark-200');
         });
     </script>
 </body>
