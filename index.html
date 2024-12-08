@@ -143,18 +143,20 @@
 
         <div class="relative">
             <pre id="output" class="hidden bg-white dark:bg-dark-200 p-4 rounded shadow whitespace-pre-wrap dark:text-gray-100"></pre>
-            <button 
-                id="copyBtn"
-                class="hidden absolute top-2 right-2 bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-200 px-3 py-1 rounded text-sm dark:text-gray-100 transition-colors duration-200"
-            >
-                Copy
-            </button>
-            <button 
-                id="askChangesBtn"
-                class="hidden absolute bottom-2 right-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200"
-            >
-                Ask for Changes
-            </button>
+            <div class="absolute top-2 right-2 flex gap-2">
+                <button 
+                    id="copyBtn"
+                    class="hidden bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-200 px-3 py-1 rounded text-sm dark:text-gray-100 transition-colors duration-200"
+                >
+                    Copy
+                </button>
+                <button 
+                    id="askChangesBtn"
+                    class="hidden bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors duration-200"
+                >
+                    Ask for Changes
+                </button>
+            </div>
         </div>
 
         <div id="changesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
