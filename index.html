@@ -393,7 +393,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: `Generate a ${templateStyle} README focusing on the main purpose, key features, and setup instructions. Include these sections: ${selectedSections.join(', ')}.`
+                                content: `You are a README generator. Only output the README content in markdown format without any additional messages or explanations. Generate a ${templateStyle} README focusing on the main purpose, key features, and setup instructions. Include these sections: ${selectedSections.join(', ')}.`
                             },
                             {
                                 role: "user",
