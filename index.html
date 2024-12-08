@@ -149,6 +149,38 @@
             >
                 Copy
             </button>
+            <button 
+                id="askChangesBtn"
+                class="hidden absolute bottom-2 right-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200"
+            >
+                Ask for Changes
+            </button>
+        </div>
+
+        <div id="changesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white dark:bg-dark-200 p-6 rounded-lg shadow-lg max-w-md w-full">
+                <h2 class="text-xl font-bold mb-4 dark:text-gray-100">Request README Changes</h2>
+                <textarea 
+                    id="changesInput"
+                    placeholder="Describe what changes you'd like to make to the README..."
+                    class="w-full h-32 p-2 border rounded mb-4 bg-white dark:bg-dark-300 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                ></textarea>
+                <div class="flex justify-end gap-2">
+                    <button 
+                        id="cancelChanges"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        id="submitChanges"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                        Submit
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -336,6 +368,7 @@
                 output.textContent = data.choices?.[0]?.message?.content || 'No content generated';
                 output.classList.remove('hidden');
                 copyBtn.classList.remove('hidden');
+                askChangesBtn.classList.remove('hidden');
             } catch (error) {
                 console.error('Error:', error);
                 showError(`Error: ${error.message}`);
@@ -380,6 +413,64 @@
         }
         
         darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        const askChangesBtn = document.getElementById('askChangesBtn');
+        const changesModal = document.getElementById('changesModal');
+        const changesInput = document.getElementById('changesInput');
+        const cancelChanges = document.getElementById('cancelChanges');
+        const submitChanges = document.getElementById('submitChanges');
+
+        askChangesBtn.addEventListener('click', () => {
+            changesModal.classList.remove('hidden');
+        });
+
+        cancelChanges.addEventListener('click', () => {
+            changesModal.classList.add('hidden');
+            changesInput.value = '';
+        });
+
+        submitChanges.addEventListener('click', async () => {
+            const changes = changesInput.value.trim();
+            if (!changes) return;
+
+            loading.classList.remove('hidden');
+            changesModal.classList.add('hidden');
+
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a helpful assistant that modifies README files based on user requests. Provide the complete modified README."
+                            },
+                            {
+                                role: "user",
+                                content: `Current README:\n${output.textContent}\n\nRequested changes: ${changes}`
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to get response');
+                
+                const data = await response.json();
+                output.textContent = data.choices[0].message.content;
+            } catch (error) {
+                showError('Error: Failed to generate changes');
+                console.error('Changes error:', error);
+            } finally {
+                loading.classList.add('hidden');
+                changesInput.value = '';
+            }
+        });
     </script>
 </body>
 </html>
